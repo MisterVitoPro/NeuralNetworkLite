@@ -1,5 +1,8 @@
 package NeuralNetwork;
 
+import NeuralNetwork.exceptions.NoHiddenLayersException;
+
+import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 public class NeuralNetwork {
@@ -7,19 +10,24 @@ public class NeuralNetwork {
     private Float[][] inputs;
     private Integer[] outputs;
 
-    private int hiddenNeurons;
     private int numOfInputs;
 
     private float calcForwardOutput;
     private ResultParser resultParser;
     private Propagator propagator;
+    private ArrayList<HiddenLayer> hiddenLayers;
 
-    public NeuralNetwork(Float[][] inputs, Integer[] outputs, int hiddenNeurons){
+    public NeuralNetwork(Float[][] inputs, Integer[] outputs){
         this.inputs = inputs;
         this.outputs = outputs;
         this.resultParser = new ResultParser();
         this.numOfInputs = inputs[0].length;
-        this.hiddenNeurons = hiddenNeurons;
+        hiddenLayers = new ArrayList<>();
+    }
+
+    public void addHiddenLayer(int neurons){
+        HiddenLayer hiddenLayer = new HiddenLayer(neurons, this.numOfInputs);
+        hiddenLayers.add(hiddenLayer);
     }
 
     /**
@@ -30,19 +38,19 @@ public class NeuralNetwork {
     public void train(int iterations) throws Exception {
         if (inputs.length != outputs.length)
             throw new Exception(String.format("Inputs and Outputs are not identical. Input Count: %d, Output Count: %d", inputs.length, outputs.length));
-
-        HiddenLayer hiddenLayer = new HiddenLayer(this.hiddenNeurons, this.numOfInputs);
+        if(hiddenLayers.size() == 0)
+            throw new NoHiddenLayersException("Need to add hidden layers!");
 
         System.out.println("Start process...");
         System.out.println(String.format("Number of Iterations: %d", iterations));
         resultParser.resetNSuccess();
         IntStream.range(0, iterations).forEach(i ->
                 IntStream.range(0, outputs.length).forEach(j -> {
-                    propagator = new Propagator(hiddenLayer.getInputWeights(), hiddenLayer.getOutputWeights(), hiddenNeurons);
+                    propagator = new Propagator(hiddenLayers.get(0).getInputWeights(), hiddenLayers.get(0).getOutputWeights(), hiddenLayers.get(0).getNeurons());
                     calcForwardOutput = propagator.forward(inputs[j].clone());
-                    propagator.backward(outputs[j], hiddenLayer.getInputWeights(), hiddenLayer.getOutputWeights(), hiddenNeurons, inputs[j].clone());
-                    hiddenLayer.setInputWeights(propagator.getInputWeights());
-                    hiddenLayer.setOutputWeights(propagator.getOutputWeights());
+                    propagator.backward(outputs[j], hiddenLayers.get(0).getInputWeights(), hiddenLayers.get(0).getOutputWeights(), hiddenLayers.get(0).getNeurons(), inputs[j].clone());
+                    hiddenLayers.get(0).setInputWeights(propagator.getInputWeights());
+                    hiddenLayers.get(0).setOutputWeights(propagator.getOutputWeights());
                     resultParser.countSuccess(calcForwardOutput, outputs[j]);
                 }));
         final float accuracy = (resultParser.getNSuccess() / (float)(iterations * outputs.length)) * 100;

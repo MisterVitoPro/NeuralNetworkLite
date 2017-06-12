@@ -6,11 +6,11 @@ import java.util.stream.IntStream;
 
 public class Propagator {
 
+    private HiddenLayer[] hiddenLayers;
     private Float[] hiddenOutputActivated;
     private Float[] hiddenInputWeightSum;
     private float outputSum;
     private float calculatedOutput;
-
     private float[][] inputWeights;
     private Float[] outputWeights;
     private int numOfNeurons;

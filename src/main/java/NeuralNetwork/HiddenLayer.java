@@ -10,8 +10,10 @@ class HiddenLayer {
 
     private Float[] outputWeights;
     private float[][] inputWeights;
+    private int neurons;
 
     HiddenLayer(int neurons, int inputs) {
+        this.neurons = neurons;
         this.outputWeights = new Float[neurons];
         this.inputWeights = new float[inputs][neurons];
 
@@ -27,6 +29,10 @@ class HiddenLayer {
 
     float[][] getInputWeights(){
         return this.inputWeights;
+    }
+
+    public int getNeurons() {
+        return neurons;
     }
 
     public void setOutputWeights(Float[] outputWeights) {

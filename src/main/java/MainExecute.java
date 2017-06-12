@@ -1,6 +1,8 @@
 import NeuralNetwork.NeuralNetwork;
 import NeuralNetwork.TestDataUtil;
 
+import java.util.Arrays;
+
 public class MainExecute {
 
     public static void main(String [] args) throws Exception {
@@ -14,10 +16,8 @@ public class MainExecute {
         neuralNetwork.addHiddenLayer(neurons);
         neuralNetwork.train(iterations);
 
-        System.out.println("Predicted result for [1,1]: " + neuralNetwork.predict(new Float[] {1f, 1f}));
-        System.out.println("Predicted result for [1,0]: " + neuralNetwork.predict(new Float[] {1f, 0f}));
-        System.out.println("Predicted result for [0,1]: " + neuralNetwork.predict(new Float[] {0f, 1f}));
-        System.out.println("Predicted result for [0,0]: " + neuralNetwork.predict(new Float[] {0f, 0f}));
+        Arrays.stream(inputsFromFile).forEach(input ->
+                System.out.println(String.format("Predicted result for [%s,%s]:%s ", input[0], input[1], neuralNetwork.predict(new Float[] {input[0], input[1]}))));
     }
 
 }

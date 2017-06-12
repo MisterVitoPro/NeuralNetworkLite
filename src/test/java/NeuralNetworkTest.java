@@ -19,7 +19,8 @@ public class NeuralNetworkTest {
         };
         final Float[] outputWeights = new Float[]{0.3f, 0.5f, 0.9f};
 
-        final NeuralNetwork neuralNetwork = new NeuralNetwork(inputs, outputs, hiddenNeurons);
+        final NeuralNetwork neuralNetwork = new NeuralNetwork(inputs, outputs);
+        neuralNetwork.addHiddenLayer(hiddenNeurons);
         System.out.println("Predicted result for [1,1]: " + neuralNetwork.predict(new Float[] {1f, 1f}));
 
         Propagator propagator = new Propagator(inputWeights, outputWeights, hiddenNeurons);

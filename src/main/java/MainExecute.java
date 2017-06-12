@@ -10,7 +10,8 @@ public class MainExecute {
         int neurons = 10;
         int iterations = 10000;
 
-        NeuralNetwork neuralNetwork = new NeuralNetwork(inputsFromFile, outputsFromFile, neurons);
+        NeuralNetwork neuralNetwork = new NeuralNetwork(inputsFromFile, outputsFromFile);
+        neuralNetwork.addHiddenLayer(neurons);
         neuralNetwork.train(iterations);
 
         System.out.println("Predicted result for [1,1]: " + neuralNetwork.predict(new Float[] {1f, 1f}));

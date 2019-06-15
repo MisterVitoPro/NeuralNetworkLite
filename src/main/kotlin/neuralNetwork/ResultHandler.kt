@@ -1,6 +1,6 @@
 package neuralNetwork
 
-class ResultParser {
+class ResultHandler {
 
     var nSuccess: Int = 0
         private set

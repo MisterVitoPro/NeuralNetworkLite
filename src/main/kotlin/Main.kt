@@ -3,7 +3,7 @@ import neuralNetwork.TestDataUtil
 
 import java.util.Arrays
 
-object MainExecute {
+object Main {
 
     @Throws(Exception::class)
     @JvmStatic
@@ -12,7 +12,7 @@ object MainExecute {
         val outputsFromFile = TestDataUtil.readOutputsFromFile("src/main/resources/outputs.txt")
 
         val neurons = 5
-        val iterations = 50000
+        val iterations = 10000
 
         val neuralNetwork = NeuralNetwork(inputsFromFile, outputsFromFile)
         neuralNetwork.addHiddenLayer(neurons)

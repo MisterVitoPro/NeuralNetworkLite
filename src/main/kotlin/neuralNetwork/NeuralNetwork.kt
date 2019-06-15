@@ -3,19 +3,27 @@ package neuralNetwork
 import neuralNetwork.exceptions.NoHiddenLayersException
 
 import java.util.ArrayList
+import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.IntStream
+
+/**
+ * Creates the weights from inputs-to-hidden and hidden-to-outputs
+ */
+class HiddenLayer(val neurons: Int, inputs: Int) {
+
+    var outputWeights = Array(neurons) { ThreadLocalRandom.current().nextFloat() }
+    var inputWeights = Array(inputs) { FloatArray(neurons) { ThreadLocalRandom.current().nextFloat()} }
+
+}
 
 class NeuralNetwork(private val inputs: Array<Array<Float>>, private val outputs: Array<Int>) {
 
-    private val numOfInputs: Int = inputs[0].size
-
-    private var calcForwardOutput: Float = 0f
-    private val resultParser: ResultParser = ResultParser()
-    private var propagator: Propagator? = null
+    private val resultHandler: ResultHandler = ResultHandler()
     private val hiddenLayers: ArrayList<HiddenLayer> = ArrayList()
+    private var propagator: Propagator? = null
 
     fun addHiddenLayer(neurons: Int) {
-        val hiddenLayer = HiddenLayer(neurons, this.numOfInputs)
+        val hiddenLayer = HiddenLayer(neurons, inputs[0].size)
         hiddenLayers.add(hiddenLayer)
     }
 
@@ -32,23 +40,24 @@ class NeuralNetwork(private val inputs: Array<Array<Float>>, private val outputs
 
         println("Start process...")
         println("Number of Iterations: $iterations")
-        resultParser.resetNSuccess()
+        resultHandler.resetNSuccess()
         for(i in 0 until iterations) {
             IntStream.range(0, outputs.size).forEach { j ->
-                propagator = Propagator(hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons)
-                calcForwardOutput = propagator!!.forward(inputs[j].clone())
-                propagator!!.backward(outputs[j].toFloat(), hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons, inputs[j].clone())
-                hiddenLayers[0].inputWeights = propagator!!.inputWeights
-                hiddenLayers[0].outputWeights = propagator!!.outputWeights
-                resultParser.countSuccess(calcForwardOutput, outputs[j].toFloat())
+                val tempPropagator = Propagator(hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons)
+                val calcForwardOutput = tempPropagator.forward(inputs[j].clone())
+                tempPropagator.backward(outputs[j].toFloat(), hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons, inputs[j].clone())
+                hiddenLayers[0].inputWeights = tempPropagator.inputWeights
+                hiddenLayers[0].outputWeights = tempPropagator.outputWeights
+                resultHandler.countSuccess(calcForwardOutput, outputs[j].toFloat())
+                propagator = tempPropagator
             }
         }
-        val accuracy = resultParser.nSuccess / (iterations * outputs.size).toFloat() * 100
+        val accuracy = resultHandler.nSuccess / (iterations * outputs.size).toFloat() * 100
         println("Accuracy: $accuracy")
     }
 
     fun predict(input: Array<Float>): Int {
-        return resultParser.parseResult(propagator!!.forward(input))
+        return resultHandler.parseResult(propagator!!.forward(input))
     }
 
 }

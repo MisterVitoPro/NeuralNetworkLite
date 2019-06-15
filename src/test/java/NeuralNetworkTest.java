@@ -1,5 +1,5 @@
-import NeuralNetwork.NeuralNetwork;
-import NeuralNetwork.Propagator;
+import neuralNetwork.NeuralNetwork;
+import neuralNetwork.Propagator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

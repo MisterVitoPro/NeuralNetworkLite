@@ -1,8 +1,6 @@
 package neuralNetwork
 
 import neuralNetwork.exceptions.NoHiddenLayersException
-
-import java.util.ArrayList
 import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.IntStream
 
@@ -10,10 +8,8 @@ import java.util.stream.IntStream
  * Creates the weights from inputs-to-hidden and hidden-to-outputs
  */
 class HiddenLayer(val neurons: Int, inputs: Int) {
-
     var outputWeights = Array(neurons) { ThreadLocalRandom.current().nextFloat() }
-    var inputWeights = Array(inputs) { FloatArray(neurons) { ThreadLocalRandom.current().nextFloat()} }
-
+    var inputWeights = Array(inputs) { FloatArray(neurons) { ThreadLocalRandom.current().nextFloat() } }
 }
 
 class NeuralNetwork(private val inputs: Array<Array<Float>>, private val outputs: Array<Int>) {
@@ -41,11 +37,18 @@ class NeuralNetwork(private val inputs: Array<Array<Float>>, private val outputs
         println("Start process...")
         println("Number of Iterations: $iterations")
         resultHandler.resetNSuccess()
-        for(i in 0 until iterations) {
+        for (i in 0 until iterations) {
             IntStream.range(0, outputs.size).forEach { j ->
-                val tempPropagator = Propagator(hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons)
+                val tempPropagator =
+                    Propagator(hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons)
                 val calcForwardOutput = tempPropagator.forward(inputs[j].clone())
-                tempPropagator.backward(outputs[j].toFloat(), hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons, inputs[j].clone())
+                tempPropagator.backward(
+                    outputs[j].toFloat(),
+                    hiddenLayers[0].inputWeights,
+                    hiddenLayers[0].outputWeights,
+                    hiddenLayers[0].neurons,
+                    inputs[j].clone()
+                )
                 hiddenLayers[0].inputWeights = tempPropagator.inputWeights
                 hiddenLayers[0].outputWeights = tempPropagator.outputWeights
                 resultHandler.countSuccess(calcForwardOutput, outputs[j].toFloat())

@@ -13,19 +13,25 @@ class Propagator(val inputWeights: Array<FloatArray>, outputWeightsParam: Array<
 
     fun forward(inputs: Array<Float>): Float {
 
-        for(i in 0 until numOfNeurons){
+        for (i in 0 until numOfNeurons) {
             val aInteger = AtomicInteger(0)
             hiddenInputWeightSum[i] = inputs.fold(0f, { a, b -> a + b * inputWeights[aInteger.getAndIncrement()][i] })
             hiddenOutputActivated[i] = sigmoidFunction(hiddenInputWeightSum[i])
         }
 
         val integer = AtomicInteger(0)
-        outputSum = hiddenOutputActivated.fold(0f,  { a, b -> a + b * outputWeights[integer.getAndIncrement()] })
+        outputSum = hiddenOutputActivated.fold(0f, { a, b -> a + b * outputWeights[integer.getAndIncrement()] })
         calculatedOutput = sigmoidFunction(outputSum)
         return calculatedOutput
     }
 
-    fun backward(target: Float, inputWeights: Array<FloatArray>, outputWeights: Array<Float>, neurons: Int, inputs: Array<Float>) {
+    fun backward(
+        target: Float,
+        inputWeights: Array<FloatArray>,
+        outputWeights: Array<Float>,
+        neurons: Int,
+        inputs: Array<Float>
+    ) {
         val marginOfError = target - calculatedOutput
         val deltaOutputSum = sigmoidFunctionDerivative(outputSum) * marginOfError
 

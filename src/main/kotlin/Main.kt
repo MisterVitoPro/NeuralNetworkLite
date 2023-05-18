@@ -8,8 +8,8 @@ fun main() {
     val neurons = 5
     val iterations = 10000
 
-    val neuralNetwork = NeuralNetwork(inputsFromFile, outputsFromFile)
-    neuralNetwork.addHiddenLayer(neurons)
+    val neuralNetwork = NeuralNetwork(inputsFromFile, outputsFromFile).addHiddenLayer(neurons)
+
     neuralNetwork.train(iterations)
 
     inputsFromFile.forEach { input ->

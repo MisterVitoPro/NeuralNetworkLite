@@ -1,5 +1,7 @@
 package neuralNetwork
 
+import neuralNetwork.activationfunction.ActivationFunction
+import neuralNetwork.activationfunction.Sigmoid
 import neuralNetwork.exceptions.NoHiddenLayersException
 import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.IntStream
@@ -16,11 +18,18 @@ class NeuralNetwork(private val inputs: Array<Array<Float>>, private val outputs
 
     private val resultHandler: ResultHandler = ResultHandler()
     private val hiddenLayers: ArrayList<HiddenLayer> = ArrayList()
+    private var activationFunc: ActivationFunction = Sigmoid()
     private var propagator: Propagator? = null
 
-    fun addHiddenLayer(neurons: Int) {
+    fun addHiddenLayer(neurons: Int): NeuralNetwork {
         val hiddenLayer = HiddenLayer(neurons, inputs[0].size)
         hiddenLayers.add(hiddenLayer)
+        return this
+    }
+
+    fun withActivationFunction(activationFunc: ActivationFunction): NeuralNetwork {
+        this.activationFunc = activationFunc
+        return this
     }
 
     /**
@@ -29,18 +38,18 @@ class NeuralNetwork(private val inputs: Array<Array<Float>>, private val outputs
      * @throws Exception
      */
     fun train(iterations: Int) {
-        if (inputs.size != outputs.size)
-            throw Exception("Inputs and Outputs are not identical. Input Count: ${inputs.size}, Output Count: ${outputs.size}")
-        if (hiddenLayers.size == 0)
-            throw NoHiddenLayersException("Need to add hidden layers!")
+//        if (inputs.size != outputs.size)
+//            throw Exception("Inputs and Outputs are not identical. Input Count: ${inputs.size}, Output Count: ${outputs.size}")
+//        if (hiddenLayers.size == 0)
+//            throw NoHiddenLayersException("Need to add hidden layers!")
 
         println("Start process...")
         println("Number of Iterations: $iterations")
         resultHandler.resetNSuccess()
-        for (i in 0 until iterations) {
+        repeat(iterations) {
             IntStream.range(0, outputs.size).forEach { j ->
                 val tempPropagator =
-                    Propagator(hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons)
+                    Propagator(hiddenLayers[0].inputWeights, hiddenLayers[0].outputWeights, hiddenLayers[0].neurons, activationFunc)
                 val calcForwardOutput = tempPropagator.forward(inputs[j].clone())
                 tempPropagator.backward(
                     outputs[j].toFloat(),

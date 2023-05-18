@@ -1,9 +1,12 @@
 package neuralNetwork
 
+import neuralNetwork.activationfunction.ActivationFunction
+import neuralNetwork.activationfunction.Sigmoid
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.IntStream
+import kotlin.math.exp
 
-class Propagator(val inputWeights: Array<FloatArray>, outputWeightsParam: Array<Float>, private val numOfNeurons: Int) {
+class Propagator(val inputWeights: Array<FloatArray>, outputWeightsParam: Array<Float>, private val numOfNeurons: Int, private val activateFunction: ActivationFunction) {
 
     private val hiddenOutputActivated: Array<Float> = Array(numOfNeurons) { 0f }
     private val hiddenInputWeightSum: Array<Float> = Array(numOfNeurons) { 0f }
@@ -15,13 +18,13 @@ class Propagator(val inputWeights: Array<FloatArray>, outputWeightsParam: Array<
 
         for (i in 0 until numOfNeurons) {
             val aInteger = AtomicInteger(0)
-            hiddenInputWeightSum[i] = inputs.fold(0f, { a, b -> a + b * inputWeights[aInteger.getAndIncrement()][i] })
-            hiddenOutputActivated[i] = sigmoidFunction(hiddenInputWeightSum[i])
+            hiddenInputWeightSum[i] = inputs.fold(0f) { a, b -> a + b * inputWeights[aInteger.getAndIncrement()][i] }
+            hiddenOutputActivated[i] = activateFunction.activate(hiddenInputWeightSum[i])
         }
 
         val integer = AtomicInteger(0)
-        outputSum = hiddenOutputActivated.fold(0f, { a, b -> a + b * outputWeights[integer.getAndIncrement()] })
-        calculatedOutput = sigmoidFunction(outputSum)
+        outputSum = hiddenOutputActivated.fold(0f) { a, b -> a + b * outputWeights[integer.getAndIncrement()] }
+        calculatedOutput = activateFunction.activate(outputSum)
         return calculatedOutput
     }
 
@@ -33,7 +36,7 @@ class Propagator(val inputWeights: Array<FloatArray>, outputWeightsParam: Array<
         inputs: Array<Float>
     ) {
         val marginOfError = target - calculatedOutput
-        val deltaOutputSum = sigmoidFunctionDerivative(outputSum) * marginOfError
+        val deltaOutputSum = activateFunction.derivative(outputSum) * marginOfError
 
         val atomicInteger = AtomicInteger(0)
         this.outputWeights = outputWeights.map { out ->
@@ -44,19 +47,11 @@ class Propagator(val inputWeights: Array<FloatArray>, outputWeightsParam: Array<
         val deltaHiddenSum = FloatArray(neurons)
         val deltaWeights = Array(inputs.size) { FloatArray(neurons) }
         IntStream.range(0, numOfNeurons).forEach { i ->
-            deltaHiddenSum[i] = deltaOutputSum * outputWeights[i] * sigmoidFunctionDerivative(hiddenInputWeightSum[i])
+            deltaHiddenSum[i] = deltaOutputSum * outputWeights[i] * activateFunction.derivative(hiddenInputWeightSum[i])
             IntStream.range(0, inputs.size).forEach { j ->
                 deltaWeights[j][i] = deltaHiddenSum[i] * inputs[j]
                 this.inputWeights[j][i] = inputWeights[j][i] + deltaWeights[j][i]
             }
         }
-    }
-
-    private fun sigmoidFunction(value: Float): Float {
-        return (1.0f / (1 + Math.exp((-value).toDouble()))).toFloat()
-    }
-
-    private fun sigmoidFunctionDerivative(value: Float): Float {
-        return sigmoidFunction(value) * (1 - sigmoidFunction(value))
     }
 }
